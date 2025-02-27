@@ -1,56 +1,58 @@
 "use client";
 
 
-import Head from "next/head"
-import { useFormik } from "formik"
-import * as Yup from "yup"
-import { useState } from "react"
-import { Box, Typography, Button, TextField } from "@mui/material"
-import { useRouter } from "next/navigation"
-import { loginUser } from '../service/authService' 
+import Head from "next/head";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useState } from "react";
+import { Box, Typography, Button, TextField } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { registerUser } from "../../service/registerService";
 
-const Login = () => {
-  const [invalidEmail, setInvalidEmail] = useState("")
-  const router = useRouter()
+const Register = () => {
+  const [registrationError, setRegistrationError] = useState("");
+  const router = useRouter();
+
  
   const formik = useFormik({
     initialValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
     validationSchema: Yup.object({
-      email: Yup.string()
-        .email("Email inválido")
-        .required("Email é obrigatório")
-        .matches(
-         
-        ),
-      password: Yup.string()
-        .required("Senha é obrigatória")
-        
+      name: Yup.string().required("Nome é obrigatório"),
+      email: Yup.string().email("Email inválido").required("Email é obrigatório"),
+      password: Yup.string().min(8, "A senha deve ter pelo menos 8 caracteres").required("Senha é obrigatória"),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password"), undefined], "As senhas devem coincidir")
+        .required("Confirmação de senha é obrigatória"),
     }),
     onSubmit: async (values) => {
-      setInvalidEmail("")
+      setRegistrationError("");
       try {
-        const data = await loginUser(values.email, values.password)  
-        console.log("Login bem-sucedido:", data)
+        // Envia os dados para o backend no formato correto
+        const response = await registerUser({
+          name: values.name,
+          email: values.email,
+          password: values.password,
+        });
 
-        alert("Login bem-sucedido!")
-        router.push("/dashboard/tableandcardspage")
+        console.log("Registro bem-sucedido:", response);
+        alert("Registro bem-sucedido!");
+        router.push("/index");
       } catch (error) {
-        console.error("Erro no login:", error)
-        formik.setErrors({ submit: "Erro ao fazer login. Tente novamente." })
-        setInvalidEmail(values.email)
+        console.error("Erro no registro:", error);
+        setRegistrationError("Erro ao fazer registro. Tente novamente.");
       }
     },
-    validateOnChange: false,
-    validateOnBlur: true,
-  })
+  });
 
   return (
     <>
       <Head>
-        <title>Login</title>
+        <title>Registro</title>
         <link
           href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap"
           rel="stylesheet"
@@ -92,7 +94,7 @@ const Login = () => {
               fontSize: "24px",
             }}
           >
-            Bem vindo !
+            Bem vindo!
           </Typography>
           <Typography
             variant="h6"
@@ -115,7 +117,7 @@ const Login = () => {
               fontSize: "20px",
             }}
           >
-            Entre com seu e-mail e senha
+            Crie sua conta
           </Typography>
 
           <form onSubmit={formik.handleSubmit}>
@@ -127,6 +129,28 @@ const Login = () => {
                 marginTop: "0.5rem",
               }}
             >
+              <TextField
+                label="Nome"
+                type="text"
+                variant="outlined"
+                size="small"
+                fullWidth
+                sx={{
+                  marginBottom: "1rem",
+                  border: "2px solid black",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "7px",
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused fieldset": {
+                      borderColor: "black",
+                    },
+                  },
+                }}
+                {...formik.getFieldProps("name")}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+              />
+
               <TextField
                 label="E-mail"
                 type="email"
@@ -171,6 +195,28 @@ const Login = () => {
                 helperText={formik.touched.password && formik.errors.password}
               />
 
+              <TextField
+                label="Confirmar Senha"
+                type="password"
+                variant="outlined"
+                size="small"
+                fullWidth
+                sx={{
+                  marginBottom: "1rem",
+                  border: "2px solid black",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "7px",
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#1E90FF",
+                    },
+                  },
+                }}
+                {...formik.getFieldProps("confirmPassword")}
+                error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+                helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
+              />
+
               <Button
                 type="submit"
                 sx={{
@@ -188,34 +234,34 @@ const Login = () => {
                   },
                 }}
               >
-                Entrar
+                Registrar
               </Button>
 
               <Button
-      onClick={() => router.push("/register_user/sing_up")} // Altere "/cadastro" para a rota correta
-      sx={{
-        width: "40%",
-        padding: "0.5rem 1rem",
-        color: "black",
-        fontSize: "15px",
-        borderRadius: "50px",
-        fontWeight: "bold",
-        textTransform: "none",
-        backgroundColor: "white",
-        marginBottom: "0.5rem",
-        border: "2px solid black",
-        "&:hover": {
-          backgroundColor: "black",
-          color: "white",
-        },
-      }}
-    >
-      Cadastre-se
-    </Button>
+                onClick={() => router.push("/login")}
+                sx={{
+                  width: "40%",
+                  padding: "0.5rem 1rem",
+                  color: "black",
+                  fontSize: "15px",
+                  borderRadius: "50px",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  backgroundColor: "white",
+                  marginBottom: "0.5rem",
+                  border: "2px solid black",
+                  "&:hover": {
+                    backgroundColor: "black",
+                    color: "white",
+                  },
+                }}
+              >
+                Voltar
+              </Button>
             </Box>
           </form>
 
-          {formik.errors.submit && (
+          {registrationError && (
             <Typography
               color="error"
               sx={{
@@ -228,13 +274,13 @@ const Login = () => {
               }}
               variant="body2"
             >
-              {formik.errors.submit}
+              {registrationError}
             </Typography>
           )}
         </Box>
       </Box>
     </>
-  )
-}
+  );
+};
 
-export default Login
+export default Register;
