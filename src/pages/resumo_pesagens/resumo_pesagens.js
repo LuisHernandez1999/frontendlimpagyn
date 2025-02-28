@@ -34,8 +34,10 @@ import {
   Business as CooperativeIcon,
   Scale as WeightIcon,
   Group as GroupIcon,
-  LocalShipping as VehicleIcon,
-  Assessment as AssessmentIcon,
+  FilterList as FilterListIcon,
+  BarChart as BarChartIcon,
+  Timeline as TimelineIcon,
+  TrendingUp as TrendingUpIcon,
 } from "@mui/icons-material"
 import Sidebar from "../../components/sidebar"
 import { keyframes } from "@emotion/react"
@@ -57,12 +59,28 @@ const PesagemSummary = () => {
     uniqueVeiculos: 0,
   })
 
-  // New state for filters
+
   const [filters, setFilters] = useState({
     startDate: null,
     endDate: null,
     tipoVeiculo: "",
     cooperativa: "",
+    data: "",
+    prefixo: "",
+    motorista: "",
+    volume_carga: "",
+    peso_calculado: "",
+  })
+
+  
+  const [columnFilters, setColumnFilters] = useState({
+    data: "",
+    prefixo: "",
+    motorista: "",
+    cooperativa: "",
+    tipo_veiculo: "",
+    volume_carga: "",
+    peso_calculado: "",
   })
 
   const fetchPesagens = useCallback(async () => {
@@ -105,6 +123,19 @@ const PesagemSummary = () => {
     setPage(0)
   }
 
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [name]: value,
+    }))
+  }
+
+  const handleColumnFilterChange = (event) => {
+    const { name, value } = event.target
+    setColumnFilters((prev) => ({ ...prev, [name]: value }))
+  }
+
   const filteredPesagens = pesagens.filter((pesagem) => {
     return (
       Object.values(pesagem).some(
@@ -113,7 +144,11 @@ const PesagemSummary = () => {
       (!filters.startDate || new Date(pesagem.data) >= filters.startDate) &&
       (!filters.endDate || new Date(pesagem.data) <= filters.endDate) &&
       (!filters.tipoVeiculo || pesagem.tipo_veiculo === filters.tipoVeiculo) &&
-      (!filters.cooperativa || pesagem.cooperativa === filters.cooperativa)
+      (!filters.cooperativa || pesagem.cooperativa === filters.cooperativa) &&
+      Object.entries(columnFilters).every(([key, value]) => {
+        if (!value) return true
+        return String(pesagem[key]).toLowerCase().includes(value.toLowerCase())
+      })
     )
   })
 
@@ -126,16 +161,25 @@ const PesagemSummary = () => {
         alignItems: "center",
         justifyContent: "center",
         borderRadius: "16px",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
         transition: "all 0.3s ease",
+        background: `linear-gradient(135deg, ${color} 0%, ${color}99 100%)`,
         "&:hover": {
           transform: "translateY(-5px)",
-          boxShadow: "0 6px 12px rgba(0, 0, 0, 0.15)",
+          boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
         },
-        backgroundColor: color,
       }}
     >
-      {React.createElement(icon, { sx: { fontSize: 40, color: "white", mb: 2 } })}
+      <Box
+        sx={{
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          borderRadius: "50%",
+          padding: "16px",
+          marginBottom: 2,
+        }}
+      >
+        {React.createElement(icon, { sx: { fontSize: 40, color: "white" } })}
+      </Box>
       <Typography variant="h4" sx={{ fontWeight: "bold", color: "white", mb: 1 }}>
         {value}
       </Typography>
@@ -144,6 +188,28 @@ const PesagemSummary = () => {
       </Typography>
     </Card>
   )
+
+  const columnFilterStyle = {
+    "& .MuiInputBase-root": {
+      color: "white",
+    },
+    "& .MuiInput-underline:before": {
+      borderBottomColor: "rgba(255, 255, 255, 0.7)",
+    },
+    "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
+      borderBottomColor: "white",
+    },
+    "& .MuiInput-underline:after": {
+      borderBottomColor: "white",
+    },
+    "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+      color: "white",
+    },
+    "& input::placeholder": {
+      color: "rgba(255, 255, 255, 0.7)",
+      opacity: 1,
+    },
+  }
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100%", margin: 0, padding: 0, overflow: "hidden" }}>
@@ -192,13 +258,13 @@ const PesagemSummary = () => {
           <Box sx={{ mb: 4, px: 2 }}>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6} md={3}>
-                <StatCard title="Total de Pesagens" value={stats.totalPesagens} icon={AssessmentIcon} color="#3f51b5" />
+                <StatCard title="Total de Pesagens" value={stats.totalPesagens} icon={BarChartIcon} color="#3f51b5" />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <StatCard
                   title="Peso Total (kg)"
                   value={stats.totalPeso.toLocaleString()}
-                  icon={WeightIcon}
+                  icon={TimelineIcon}
                   color="#f57c00"
                 />
               </Grid>
@@ -206,7 +272,7 @@ const PesagemSummary = () => {
                 <StatCard title="Motoristas Únicos" value={stats.uniqueMotoristas} icon={GroupIcon} color="#43a047" />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <StatCard title="Veículos Únicos" value={stats.uniqueVeiculos} icon={VehicleIcon} color="#e53935" />
+                <StatCard title="Veículos Únicos" value={stats.uniqueVeiculos} icon={TrendingUpIcon} color="#e53935" />
               </Grid>
             </Grid>
           </Box>
@@ -269,7 +335,7 @@ const PesagemSummary = () => {
                     onChange={(e) => setFilters({ ...filters, cooperativa: e.target.value })}
                   >
                     <MenuItem value="">Todas</MenuItem>
-                    {/* Add cooperativa options dynamically based on your data */}
+                   
                   </Select>
                 </FormControl>
               </Grid>
@@ -334,31 +400,138 @@ const PesagemSummary = () => {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>Data</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
+                      Data
+                      <TextField
+                        name="data"
+                        value={columnFilters.data}
+                        onChange={handleColumnFilterChange}
+                        variant="standard"
+                        placeholder="Filtrar"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <FilterListIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
+                      />
+                    </TableCell>
                     <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
                       Prefixo
+                      <TextField
+                        name="prefixo"
+                        value={columnFilters.prefixo}
+                        onChange={handleColumnFilterChange}
+                        variant="standard"
+                        placeholder="Filtrar"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <FilterListIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
+                      />
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
                       Motorista
+                      <TextField
+                        name="motorista"
+                        value={columnFilters.motorista}
+                        onChange={handleColumnFilterChange}
+                        variant="standard"
+                        placeholder="Filtrar"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <FilterListIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
+                      />
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
                       Cooperativa
+                      <TextField
+                        name="cooperativa"
+                        value={columnFilters.cooperativa}
+                        onChange={handleColumnFilterChange}
+                        variant="standard"
+                        placeholder="Filtrar"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <FilterListIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
+                      />
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
                       Tipo Veículo
+                      <TextField
+                        name="tipo_veiculo"
+                        value={columnFilters.tipo_veiculo}
+                        onChange={handleColumnFilterChange}
+                        variant="standard"
+                        placeholder="Filtrar"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <FilterListIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
+                      />
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
                       Volume Carga
+                      <TextField
+                        name="volume_carga"
+                        value={columnFilters.volume_carga}
+                        onChange={handleColumnFilterChange}
+                        variant="standard"
+                        placeholder="Filtrar"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <FilterListIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
+                      />
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
                       Peso Calculado
+                      <TextField
+                        name="peso_calculado"
+                        value={columnFilters.peso_calculado}
+                        onChange={handleColumnFilterChange}
+                        variant="standard"
+                        placeholder="Filtrar"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <FilterListIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
+                      />
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center">
+                      <TableCell colSpan={8} align="center">
                         <Typography variant="h6" sx={{ fontStyle: "italic", color: "#757575" }}>
                           Carregando...
                         </Typography>
@@ -366,7 +539,7 @@ const PesagemSummary = () => {
                     </TableRow>
                   ) : filteredPesagens.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center">
+                      <TableCell colSpan={8} align="center">
                         <Typography variant="h6" sx={{ fontStyle: "italic", color: "#757575" }}>
                           Nenhuma pesagem encontrada.
                         </Typography>

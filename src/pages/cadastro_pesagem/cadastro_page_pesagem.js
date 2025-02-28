@@ -139,7 +139,7 @@ const PesagemForm = () => {
         prefixo: "",
         veiculo: "",
         motorista: "",
-        cooperativa: "", // Resetting the new field
+        cooperativa: "", 
         hora_chegada: "",
         hora_saida: "",
         volume_carga: "",
