@@ -127,7 +127,7 @@ const PesagemList = () => {
   )
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", width: "100%", margin: 0, padding: 0, overflow: "hidden" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", width: "100%", margin: 0, padding: 0, overflow: "hidden", backgroundColor: "#f0f4f8" }}>
       <Sidebar />
       <Box
         sx={{

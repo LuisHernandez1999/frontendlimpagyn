@@ -115,8 +115,29 @@ const EditPesagem = () => {
     setSnackbar((prev) => ({ ...prev, open: false }))
   }
 
+  const inputStyle = {
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "black",
+        borderRadius: "15px",
+      },
+      "&:hover fieldset": {
+        borderColor: "black",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "black",
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color: "black",
+    },
+    "& .MuiInputBase-input": {
+      color: "black",
+    },
+  }
+
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "#f0f4f8" }}>
       <Sidebar />
       <Box
         component="main"
@@ -130,7 +151,7 @@ const EditPesagem = () => {
         <Typography variant="h4" sx={{ mb: 4 }}>
           Editar Pesagem
         </Typography>
-        <Card sx={{ p: 4 }}>
+        <Card sx={{ p: 4, borderRadius: "20px", backgroundColor: "white" }}>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
@@ -143,10 +164,11 @@ const EditPesagem = () => {
                   onChange={handleChange}
                   required
                   InputLabelProps={{ shrink: true }}
+                  sx={inputStyle}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
+                <FormControl fullWidth sx={inputStyle}>
                   <InputLabel>Prefixo</InputLabel>
                   <Select name="prefixo" value={formData.prefixo} onChange={handleChange} required>
                     <MenuItem value="BC">BC</MenuItem>
@@ -163,6 +185,7 @@ const EditPesagem = () => {
                   value={formData.veiculo}
                   onChange={handleChange}
                   required
+                  sx={inputStyle}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -173,6 +196,7 @@ const EditPesagem = () => {
                   value={formData.motorista}
                   onChange={handleChange}
                   required
+                  sx={inputStyle}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -183,6 +207,7 @@ const EditPesagem = () => {
                   value={formData.cooperativa}
                   onChange={handleChange}
                   required
+                  sx={inputStyle}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -195,6 +220,7 @@ const EditPesagem = () => {
                   onChange={handleChange}
                   required
                   InputLabelProps={{ shrink: true }}
+                  sx={inputStyle}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -207,6 +233,7 @@ const EditPesagem = () => {
                   onChange={handleChange}
                   required
                   InputLabelProps={{ shrink: true }}
+                  sx={inputStyle}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -230,6 +257,7 @@ const EditPesagem = () => {
                   InputProps={{
                     readOnly: true,
                   }}
+                  sx={inputStyle}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -259,4 +287,3 @@ const EditPesagem = () => {
 }
 
 export default EditPesagem
-

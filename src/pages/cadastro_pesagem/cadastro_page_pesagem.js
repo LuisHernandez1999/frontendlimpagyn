@@ -194,7 +194,7 @@ const PesagemForm = () => {
   }
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "#f0f4f8", }}>
       <Sidebar />
       <Box
         component="main"
