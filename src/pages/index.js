@@ -192,7 +192,7 @@ const Login = () => {
               </Button>
 
               <Button
-      onClick={() => router.push("/register_user/sing_up")} // Altere "/cadastro" para a rota correta
+      onClick={() => router.push("/cadastro_user/cadastro_user_page")} // Altere "/cadastro" para a rota correta
       sx={{
         width: "40%",
         padding: "0.5rem 1rem",

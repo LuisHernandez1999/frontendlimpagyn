@@ -6,6 +6,7 @@ import {
   Box,
   Typography,
   TextField,
+  Button,
   Table,
   TableBody,
   TableCell,
@@ -34,7 +35,6 @@ import {
   Business as CooperativeIcon,
   Scale as WeightIcon,
   Group as GroupIcon,
-  FilterList as FilterListIcon,
   BarChart as BarChartIcon,
   Timeline as TimelineIcon,
   TrendingUp as TrendingUpIcon,
@@ -44,6 +44,42 @@ import { keyframes } from "@emotion/react"
 import { DatePicker } from "@mui/x-date-pickers/DatePicker"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
+import * as XLSX from "xlsx";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+import FileDownloadIcon from "@mui/icons-material/Download";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+
+
+const handleExportExcel = () => {
+  const worksheet = XLSX.utils.json_to_sheet(filteredPesagens);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Pesagens");
+  XLSX.writeFile(workbook, "pesagens.xlsx");
+};
+
+const handleExportPDF = (data) => {
+  const doc = new jsPDF();
+  doc.text("Relatório de Pesagens", 20, 10);
+
+  const tableColumn = ["Data", "Prefixo", "Motorista", "Cooperativa", "Tipo Veículo", "Volume Carga", "Peso Calculado"];
+  const tableRows = data.map((pesagem) => [
+    pesagem.data,
+    pesagem.prefixo,
+    pesagem.motorista,
+    pesagem.cooperativa,
+    pesagem.tipoVeiculo,
+    pesagem.volume_carga,
+    pesagem.pesoCalculado,
+  ]);
+
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+  });
+
+  doc.save("pesagens.pdf");
+};
 
 const PesagemSummary = () => {
   const theme = useTheme()
@@ -59,28 +95,14 @@ const PesagemSummary = () => {
     uniqueVeiculos: 0,
   })
 
-
   const [filters, setFilters] = useState({
     startDate: null,
     endDate: null,
+    prefixo: "",
     tipoVeiculo: "",
+    volumeCarga: "",
     cooperativa: "",
-    data: "",
-    prefixo: "",
-    motorista: "",
-    volume_carga: "",
-    peso_calculado: "",
-  })
-
-  
-  const [columnFilters, setColumnFilters] = useState({
-    data: "",
-    prefixo: "",
-    motorista: "",
-    cooperativa: "",
-    tipo_veiculo: "",
-    volume_carga: "",
-    peso_calculado: "",
+    pesoCalculado: "",
   })
 
   const fetchPesagens = useCallback(async () => {
@@ -98,15 +120,16 @@ const PesagemSummary = () => {
 
   const calculateStats = (data) => {
     const totalPesagens = data.length
-    const totalPeso = data.reduce((sum, pesagem) => sum + pesagem.peso_calculado, 0)
-    const uniqueMotoristas = new Set(data.map((pesagem) => pesagem.motorista)).size
-    const uniqueVeiculos = new Set(data.map((pesagem) => pesagem.prefixo)).size
+    const totalPeso = data.reduce(
+      (sum, pesagem) => sum + calcularPeso(getTipoVeiculo(pesagem.prefixo), pesagem.volume_carga),
+      0,
+    )
+  
 
     setStats({
       totalPesagens,
       totalPeso,
-      uniqueMotoristas,
-      uniqueVeiculos,
+     
     })
   }
 
@@ -125,30 +148,97 @@ const PesagemSummary = () => {
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: value,
-    }))
+    setFilters((prevFilters) => {
+      const newFilters = {
+        ...prevFilters,
+        [name]: value,
+      }
+
+     
+      if (name === "prefixo") {
+        newFilters.tipoVeiculo = getTipoVeiculo(value)
+      }
+
+     
+      if (name === "tipoVeiculo" || name === "volumeCarga") {
+        newFilters.pesoCalculado = calcularPeso(newFilters.tipoVeiculo, newFilters.volumeCarga).toString()
+      }
+
+      return newFilters
+    })
   }
 
-  const handleColumnFilterChange = (event) => {
-    const { name, value } = event.target
-    setColumnFilters((prev) => ({ ...prev, [name]: value }))
+  const calcularPeso = (tipoVeiculo, volumeCarga) => {
+    const pesos = {
+      Basculante: {
+        baixo: 75,
+        medio: 150,
+        alto: 300,
+      },
+      Selectolix: {
+        baixo: 512.5,
+        medio: 1025,
+        alto: 2050,
+      },
+      Baú: {
+        baixo: 562.5,
+        medio: 1125,
+        alto: 2250,
+      },
+    }
+    return pesos[tipoVeiculo]?.[volumeCarga] || 0
+  }
+
+  const getTipoVeiculo = (prefixo) => {
+    const prefix = prefixo.substring(0, 2).toUpperCase()
+    switch (prefix) {
+      case "BC":
+        return "Basculante"
+      case "SL":
+        return "Selectolix"
+      case "BS":
+        return "Baú"
+      default:
+        return ""
+    }
+  }
+
+  const getVolumeInfo = (tipoVeiculo) => {
+    const volumes = {
+      Basculante: {
+        alto: "6 M³",
+        medio: "3 M³",
+        baixo: "1,5 M³",
+      },
+      Selectolix: {
+        alto: "12 M³",
+        medio: "6 M³",
+        baixo: "3 M³",
+      },
+      Baú: {
+        alto: "45 M³",
+        medio: "22,5 M³",
+        baixo: "11,25 M³",
+      },
+    }
+    return volumes[tipoVeiculo] || null
   }
 
   const filteredPesagens = pesagens.filter((pesagem) => {
+    const tipoVeiculo = getTipoVeiculo(pesagem.prefixo)
+    const pesoCalculado = calcularPeso(tipoVeiculo, pesagem.volume_carga)
+
     return (
       Object.values(pesagem).some(
         (value) => typeof value === "string" && value.toLowerCase().includes(search.toLowerCase()),
       ) &&
       (!filters.startDate || new Date(pesagem.data) >= filters.startDate) &&
       (!filters.endDate || new Date(pesagem.data) <= filters.endDate) &&
-      (!filters.tipoVeiculo || pesagem.tipo_veiculo === filters.tipoVeiculo) &&
+      (!filters.prefixo || pesagem.prefixo.startsWith(filters.prefixo)) &&
+      (!filters.tipoVeiculo || tipoVeiculo === filters.tipoVeiculo) &&
+      (!filters.volumeCarga || pesagem.volume_carga === filters.volumeCarga) &&
       (!filters.cooperativa || pesagem.cooperativa === filters.cooperativa) &&
-      Object.entries(columnFilters).every(([key, value]) => {
-        if (!value) return true
-        return String(pesagem[key]).toLowerCase().includes(value.toLowerCase())
-      })
+      (!filters.pesoCalculado || pesoCalculado.toString().includes(filters.pesoCalculado))
     )
   })
 
@@ -188,28 +278,6 @@ const PesagemSummary = () => {
       </Typography>
     </Card>
   )
-
-  const columnFilterStyle = {
-    "& .MuiInputBase-root": {
-      color: "white",
-    },
-    "& .MuiInput-underline:before": {
-      borderBottomColor: "rgba(255, 255, 255, 0.7)",
-    },
-    "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
-      borderBottomColor: "white",
-    },
-    "& .MuiInput-underline:after": {
-      borderBottomColor: "white",
-    },
-    "& .MuiInputAdornment-root .MuiSvgIcon-root": {
-      color: "white",
-    },
-    "& input::placeholder": {
-      color: "rgba(255, 255, 255, 0.7)",
-      opacity: 1,
-    },
-  }
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100%", margin: 0, padding: 0, overflow: "hidden" }}>
@@ -257,22 +325,27 @@ const PesagemSummary = () => {
         <Fade in={true} timeout={1000}>
           <Box sx={{ mb: 4, px: 2 }}>
             <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={6}>
+  <StatCard
+    title="Total de Pesagens"
+    value={stats.totalPesagens}
+    icon={BarChartIcon}
+    color="#3f51b5"
+  />
+</Grid>
+<Grid item xs={12} sm={6} md={6}>
+  <StatCard
+    title="Peso Total (kg)"
+    value={stats.totalPeso.toLocaleString()}
+    icon={TimelineIcon}
+    color="#f57c00"
+  />
+</Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <StatCard title="Total de Pesagens" value={stats.totalPesagens} icon={BarChartIcon} color="#3f51b5" />
+                
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
-                <StatCard
-                  title="Peso Total (kg)"
-                  value={stats.totalPeso.toLocaleString()}
-                  icon={TimelineIcon}
-                  color="#f57c00"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <StatCard title="Motoristas Únicos" value={stats.uniqueMotoristas} icon={GroupIcon} color="#43a047" />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <StatCard title="Veículos Únicos" value={stats.uniqueVeiculos} icon={TrendingUpIcon} color="#e53935" />
+              
               </Grid>
             </Grid>
           </Box>
@@ -292,7 +365,35 @@ const PesagemSummary = () => {
             <Typography variant="h6" sx={{ mb: 2 }}>
               Filtros
             </Typography>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} sm={6} md={3}>
+  <TextField
+    fullWidth
+    label="Pesquisar Motorista"
+    variant="outlined"
+    size="medium"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon />
+        </InputAdornment>
+      ),
+    }}
+  />
+
+  {/* aqui biba mostra a lista apenas se houver busca */}
+  {search && (
+    <List>
+      {filteredMotoristas.map((motorista) => (
+        <ListItem key={motorista.id} button>
+          <ListItemText primary={motorista.nome} />
+        </ListItem>
+      ))}
+    </List>
+  )}
+</Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <DatePicker
@@ -315,12 +416,24 @@ const PesagemSummary = () => {
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <FormControl fullWidth>
+                  <InputLabel>Prefixo</InputLabel>
+                  <Select value={filters.prefixo} onChange={handleFilterChange} name="prefixo" label="Prefixo">
+                    <MenuItem value="BC">BC (Basculante)</MenuItem>
+                    <MenuItem value="SL">SL (Selectolix)</MenuItem>
+                    <MenuItem value="BS">BS (Baú)</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth>
                   <InputLabel>Tipo de Veículo</InputLabel>
                   <Select
                     value={filters.tipoVeiculo}
-                    onChange={(e) => setFilters({ ...filters, tipoVeiculo: e.target.value })}
+                    onChange={handleFilterChange}
+                    name="tipoVeiculo"
+                    label="Tipo de Veículo"
                   >
-                    <MenuItem value="">Todos</MenuItem>
+                    
                     <MenuItem value="Basculante">Basculante</MenuItem>
                     <MenuItem value="Selectolix">Selectolix</MenuItem>
                     <MenuItem value="Baú">Baú</MenuItem>
@@ -329,15 +442,63 @@ const PesagemSummary = () => {
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <FormControl fullWidth>
+                  <InputLabel>Volume de Carga</InputLabel>
+                  <Select
+                    value={filters.volumeCarga}
+                    onChange={handleFilterChange}
+                    name="volumeCarga"
+                    label="Volume de Carga"
+                  >
+                  
+                    <MenuItem value="baixo">Baixo</MenuItem>
+                    <MenuItem value="medio">Médio</MenuItem>
+                    <MenuItem value="alto">Alto</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth>
                   <InputLabel>Cooperativa</InputLabel>
                   <Select
                     value={filters.cooperativa}
-                    onChange={(e) => setFilters({ ...filters, cooperativa: e.target.value })}
+                    onChange={handleFilterChange}
+                    name="cooperativa"
+                    label="Cooperativa"
                   >
                     <MenuItem value="">Todas</MenuItem>
-                   
+                    {/*aqui baitola adicione as opções de cooperativas aqui */}
                   </Select>
                 </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField
+                  fullWidth
+                  label="Peso Calculado"
+                  variant="outlined"
+                  size="medium"
+                  value={filters.pesoCalculado}
+                  onChange={handleFilterChange}
+                  name="pesoCalculado"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Tooltip title="Atualizar dados">
+                  <IconButton
+                    onClick={fetchPesagens}
+                    color="primary"
+                    sx={{
+                      backgroundColor: "#e3f2fd",
+                      "&:hover": { backgroundColor: "#bbdefb" },
+                      width: "56px",
+                      height: "56px",
+                    }}
+                  >
+                    <RefreshIcon />
+                  </IconButton>
+                </Tooltip>
               </Grid>
             </Grid>
           </Card>
@@ -358,251 +519,102 @@ const PesagemSummary = () => {
               },
             }}
           >
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-              <TextField
-                label="Pesquisar"
-                variant="outlined"
-                size="small"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
+          <TableContainer sx={{ maxHeight: "calc(100vh - 300px)" }}>
+  
+  <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, padding: 2 }}>
+    <Button variant="contained" color="primary" startIcon={<FileDownloadIcon />} onClick={handleExportExcel}>
+      Exportar Excel
+    </Button>
+    <Button variant="contained" color="secondary" startIcon={<PictureAsPdfIcon />} onClick={handleExportPDF}>
+      Exportar PDF
+    </Button>
+  </Box>
+
+  <Table stickyHeader>
+    <TableHead>
+      <TableRow>
+        <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>Data</TableCell>
+        <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>Prefixo</TableCell>
+        <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>Motorista</TableCell>
+        <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>Cooperativa</TableCell>
+        <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>Tipo Veículo</TableCell>
+        <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>Volume Carga</TableCell>
+        <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>Peso Calculado</TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {loading ? (
+        <TableRow>
+          <TableCell colSpan={7} align="center">
+            <Typography variant="h6" sx={{ fontStyle: "italic", color: "#757575" }}>
+              Carregando...
+            </Typography>
+          </TableCell>
+        </TableRow>
+      ) : filteredPesagens.length === 0 ? (
+        <TableRow>
+          <TableCell colSpan={7} align="center">
+            <Typography variant="h6" sx={{ fontStyle: "italic", color: "#757575" }}>
+              Nenhuma pesagem encontrada.
+            </Typography>
+          </TableCell>
+        </TableRow>
+      ) : (
+        filteredPesagens
+          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+          .map((pesagem, index) => {
+            const tipoVeiculo = getTipoVeiculo(pesagem.prefixo);
+            const pesoCalculado = calcularPeso(tipoVeiculo, pesagem.volume_carga);
+            return (
+              <TableRow
+                key={pesagem.id}
                 sx={{
-                  width: "300px",
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "25px",
-                    transition: "all 0.3s ease-in-out",
-                    "&:hover": {
-                      boxShadow: "0 0 0 2px #3498db",
-                    },
-                    "&.Mui-focused": {
-                      boxShadow: "0 0 0 2px #3498db",
-                    },
+                  "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover },
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.04)",
+                    transform: "scale(1.01)",
                   },
+                  animation: `${fadeIn} 0.5s ease-out ${index * 0.05}s both`,
                 }}
-              />
-              <Tooltip title="Atualizar dados">
-                <IconButton
-                  onClick={fetchPesagens}
-                  color="primary"
-                  sx={{ backgroundColor: "#e3f2fd", "&:hover": { backgroundColor: "#bbdefb" } }}
-                >
-                  <RefreshIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <TableContainer sx={{ maxHeight: "calc(100vh - 300px)" }}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
-                      Data
-                      <TextField
-                        name="data"
-                        value={columnFilters.data}
-                        onChange={handleColumnFilterChange}
-                        variant="standard"
-                        placeholder="Filtrar"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <FilterListIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
-                      Prefixo
-                      <TextField
-                        name="prefixo"
-                        value={columnFilters.prefixo}
-                        onChange={handleColumnFilterChange}
-                        variant="standard"
-                        placeholder="Filtrar"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <FilterListIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
-                      Motorista
-                      <TextField
-                        name="motorista"
-                        value={columnFilters.motorista}
-                        onChange={handleColumnFilterChange}
-                        variant="standard"
-                        placeholder="Filtrar"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <FilterListIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
-                      Cooperativa
-                      <TextField
-                        name="cooperativa"
-                        value={columnFilters.cooperativa}
-                        onChange={handleColumnFilterChange}
-                        variant="standard"
-                        placeholder="Filtrar"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <FilterListIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
-                      Tipo Veículo
-                      <TextField
-                        name="tipo_veiculo"
-                        value={columnFilters.tipo_veiculo}
-                        onChange={handleColumnFilterChange}
-                        variant="standard"
-                        placeholder="Filtrar"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <FilterListIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
-                      Volume Carga
-                      <TextField
-                        name="volume_carga"
-                        value={columnFilters.volume_carga}
-                        onChange={handleColumnFilterChange}
-                        variant="standard"
-                        placeholder="Filtrar"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <FilterListIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", backgroundColor: "#3f51b5", color: "white" }}>
-                      Peso Calculado
-                      <TextField
-                        name="peso_calculado"
-                        value={columnFilters.peso_calculado}
-                        onChange={handleColumnFilterChange}
-                        variant="standard"
-                        placeholder="Filtrar"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <FilterListIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{ ...columnFilterStyle, ml: 1, width: "100px" }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={8} align="center">
-                        <Typography variant="h6" sx={{ fontStyle: "italic", color: "#757575" }}>
-                          Carregando...
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : filteredPesagens.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} align="center">
-                        <Typography variant="h6" sx={{ fontStyle: "italic", color: "#757575" }}>
-                          Nenhuma pesagem encontrada.
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredPesagens
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((pesagem, index) => (
-                        <TableRow
-                          key={pesagem.id}
-                          sx={{
-                            "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover },
-                            transition: "all 0.2s",
-                            "&:hover": {
-                              backgroundColor: "rgba(0, 0, 0, 0.04)",
-                              transform: "scale(1.01)",
-                            },
-                            animation: `${fadeIn} 0.5s ease-out ${index * 0.05}s both`,
-                          }}
-                        >
-                          <TableCell>{pesagem.data}</TableCell>
-                          <TableCell>
-                            <Chip
-                              icon={<TruckIcon />}
-                              label={pesagem.prefixo}
-                              color="primary"
-                              variant="outlined"
-                              size="small"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Tooltip title={`Motorista: ${pesagem.motorista}`}>
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <DriverIcon sx={{ mr: 1, color: "#1976d2" }} />
-                                <Typography>{pesagem.motorista}</Typography>
-                              </Box>
-                            </Tooltip>
-                          </TableCell>
-                          <TableCell>
-                            <Tooltip title={`Cooperativa: ${pesagem.cooperativa}`}>
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <CooperativeIcon sx={{ mr: 1, color: "#388e3c" }} />
-                                <Typography>{pesagem.cooperativa}</Typography>
-                              </Box>
-                            </Tooltip>
-                          </TableCell>
-                          <TableCell>{pesagem.tipo_veiculo}</TableCell>
-                          <TableCell>{pesagem.volume_carga}</TableCell>
-                          <TableCell>
-                            <Tooltip title={`Peso Calculado: ${pesagem.peso_calculado} kg`}>
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <WeightIcon sx={{ mr: 1, color: "#f57c00" }} />
-                                <Typography>{pesagem.peso_calculado} kg</Typography>
-                              </Box>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+              >
+                <TableCell>{pesagem.data}</TableCell>
+                <TableCell>
+                  <Chip icon={<TruckIcon />} label={pesagem.prefixo} color="primary" variant="outlined" size="small" />
+                </TableCell>
+                <TableCell>
+                  <Tooltip title={`Motorista: ${pesagem.motorista}`}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <DriverIcon sx={{ mr: 1, color: "#1976d2" }} />
+                      <Typography>{pesagem.motorista}</Typography>
+                    </Box>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip title={`Cooperativa: ${pesagem.cooperativa}`}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <CooperativeIcon sx={{ mr: 1, color: "#388e3c" }} />
+                      <Typography>{pesagem.cooperativa}</Typography>
+                    </Box>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>{tipoVeiculo}</TableCell>
+                <TableCell>{pesagem.volume_carga}</TableCell>
+                <TableCell>
+                  <Tooltip title={`Peso Calculado: ${pesoCalculado} kg`}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <WeightIcon sx={{ mr: 1, color: "#f57c00" }} />
+                      <Typography>{pesoCalculado} kg</Typography>
+                    </Box>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            );
+          })
+      )}
+    </TableBody>
+  </Table>
+</TableContainer>
             <TablePagination
               rowsPerPageOptions={[10, 25, 50]}
               component="div"
