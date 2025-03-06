@@ -32,16 +32,13 @@ import {
   ArrowBack as ArrowBackIcon,
 } from "@mui/icons-material"
 
-
-const purpleColors = {
-  darkPurple: "#4a148c", 
-  mediumPurple: "#7b1fa2", 
-  lightPurple: "#9c27b0", 
-  lighterPurple: "#ba68c8", 
-  paleViolet: "#e1bee7", 
-  deepPurple: "#311b92", 
-  textPurple: "#4a148c", 
-  purpleShadow: "rgba(74, 20, 140, 0.4)", 
+const greenColors = {
+  lightGreen: "#8bc34a",
+  paleGreen: "#dcedc8",
+  mediumGreen: "#7cb342",
+  darkGreen: "#689f38",
+  textGreen: "#33691e",
+  greenShadow: "rgba(139, 195, 74, 0.4)",
 }
 
 const Register = () => {
@@ -56,7 +53,6 @@ const Register = () => {
   const isMedium = useMediaQuery(theme.breakpoints.down("md"))
 
   useEffect(() => {
-   
     const timer = setTimeout(() => {
       setAnimationComplete(true)
     }, 300)
@@ -89,7 +85,6 @@ const Register = () => {
         })
         console.log("Registro bem-sucedido:", response)
 
-        
         setTimeout(() => {
           router.push("/login")
         }, 1500)
@@ -111,13 +106,12 @@ const Register = () => {
     setShowConfirmPassword(!showConfirmPassword)
   }
 
-  
   const getPasswordStrength = (password) => {
     if (!password) return { strength: 0, color: "#e0e0e0" }
-    if (password.length < 6) return { strength: 25, color: "#f44336" } 
-    if (password.length < 8) return { strength: 50, color: "#9c27b0" }
-    if (password.length < 10) return { strength: 75, color: "#7b1fa2" } 
-    return { strength: 100, color: "#4a148c" } 
+    if (password.length < 6) return { strength: 25, color: "#f44336" }
+    if (password.length < 8) return { strength: 50, color: greenColors.lightGreen }
+    if (password.length < 10) return { strength: 75, color: greenColors.mediumGreen }
+    return { strength: 100, color: greenColors.darkGreen }
   }
 
   const passwordStrength = getPasswordStrength(formik.values.password)
@@ -135,13 +129,12 @@ const Register = () => {
         sx={{
           minHeight: "100vh",
           display: "flex",
-          background: `linear-gradient(135deg, ${purpleColors.deepPurple} 0%, ${purpleColors.lightPurple} 100%)`,
+          background: `linear-gradient(135deg, ${greenColors.paleGreen} 0%, ${greenColors.lightGreen} 100%)`,
           position: "relative",
           overflow: "hidden",
           padding: { xs: "1rem", sm: "2rem" },
         }}
       >
-       
         {[...Array(6)].map((_, i) => (
           <Box
             key={i}
@@ -186,10 +179,10 @@ const Register = () => {
                 flexDirection: "column",
                 background: "rgba(255, 255, 255, 0.95)",
                 backdropFilter: "blur(20px)",
-                boxShadow: `0 10px 40px ${purpleColors.purpleShadow}`,
+                boxShadow: `0 10px 40px ${greenColors.greenShadow}`,
                 transition: "all 0.3s ease-in-out",
                 "&:hover": {
-                  boxShadow: `0 15px 50px ${purpleColors.purpleShadow}`,
+                  boxShadow: `0 15px 50px ${greenColors.greenShadow}`,
                 },
               }}
             >
@@ -207,12 +200,12 @@ const Register = () => {
                       width: "80px",
                       height: "80px",
                       borderRadius: "24px",
-                      background: `linear-gradient(135deg, ${purpleColors.darkPurple} 0%, ${purpleColors.lightPurple} 100%)`,
+                      background: `linear-gradient(135deg, ${greenColors.darkGreen} 0%, ${greenColors.lightGreen} 100%)`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       marginBottom: "1.5rem",
-                      boxShadow: `0 8px 25px ${purpleColors.purpleShadow}`,
+                      boxShadow: `0 8px 25px ${greenColors.greenShadow}`,
                       transform: "rotate(10deg)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -230,7 +223,7 @@ const Register = () => {
                     sx={{
                       fontFamily: "'Poppins', sans-serif",
                       fontWeight: 700,
-                      color: purpleColors.darkPurple,
+                      color: greenColors.textGreen,
                       marginBottom: "0.5rem",
                       textAlign: "center",
                       letterSpacing: "-0.5px",
@@ -267,7 +260,7 @@ const Register = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <PersonIcon sx={{ color: purpleColors.mediumPurple }} />
+                            <PersonIcon sx={{ color: greenColors.mediumGreen }} />
                           </InputAdornment>
                         ),
                       }}
@@ -276,18 +269,18 @@ const Register = () => {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "16px",
                           "&.Mui-focused fieldset": {
-                            borderColor: purpleColors.mediumPurple,
+                            borderColor: greenColors.mediumGreen,
                             borderWidth: "2px",
                           },
                           "& fieldset": {
                             transition: "all 0.2s ease",
                           },
                           "&:hover fieldset": {
-                            borderColor: purpleColors.lighterPurple,
+                            borderColor: greenColors.lightGreen,
                           },
                         },
                         "& .MuiInputLabel-root.Mui-focused": {
-                          color: purpleColors.mediumPurple,
+                          color: greenColors.mediumGreen,
                         },
                         "& .MuiInputBase-input": {
                           padding: "14px 14px 14px 0",
@@ -310,7 +303,7 @@ const Register = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <EmailIcon sx={{ color: purpleColors.mediumPurple }} />
+                            <EmailIcon sx={{ color: greenColors.mediumGreen }} />
                           </InputAdornment>
                         ),
                       }}
@@ -319,18 +312,18 @@ const Register = () => {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "16px",
                           "&.Mui-focused fieldset": {
-                            borderColor: purpleColors.mediumPurple,
+                            borderColor: greenColors.mediumGreen,
                             borderWidth: "2px",
                           },
                           "& fieldset": {
                             transition: "all 0.2s ease",
                           },
                           "&:hover fieldset": {
-                            borderColor: purpleColors.lighterPurple,
+                            borderColor: greenColors.lightGreen,
                           },
                         },
                         "& .MuiInputLabel-root.Mui-focused": {
-                          color: purpleColors.mediumPurple,
+                          color: greenColors.mediumGreen,
                         },
                         "& .MuiInputBase-input": {
                           padding: "14px 14px 14px 0",
@@ -355,7 +348,7 @@ const Register = () => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <LockIcon sx={{ color: purpleColors.mediumPurple }} />
+                              <LockIcon sx={{ color: greenColors.mediumGreen }} />
                             </InputAdornment>
                           ),
                           endAdornment: (
@@ -364,7 +357,7 @@ const Register = () => {
                                 aria-label="toggle password visibility"
                                 onClick={handleTogglePasswordVisibility}
                                 edge="end"
-                                sx={{ color: purpleColors.mediumPurple }}
+                                sx={{ color: greenColors.mediumGreen }}
                               >
                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
@@ -376,18 +369,18 @@ const Register = () => {
                           "& .MuiOutlinedInput-root": {
                             borderRadius: "16px",
                             "&.Mui-focused fieldset": {
-                              borderColor: purpleColors.mediumPurple,
+                              borderColor: greenColors.mediumGreen,
                               borderWidth: "2px",
                             },
                             "& fieldset": {
                               transition: "all 0.2s ease",
                             },
                             "&:hover fieldset": {
-                              borderColor: purpleColors.lighterPurple,
+                              borderColor: greenColors.lightGreen,
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: purpleColors.mediumPurple,
+                            color: greenColors.mediumGreen,
                           },
                           "& .MuiInputBase-input": {
                             padding: "14px 14px 14px 0",
@@ -398,7 +391,6 @@ const Register = () => {
                         helperText={formik.touched.password && formik.errors.password}
                       />
 
-                   
                       {formik.values.password && (
                         <Box sx={{ mt: 0.5, mb: 2 }}>
                           <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
@@ -451,7 +443,7 @@ const Register = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <LockIcon sx={{ color: purpleColors.mediumPurple }} />
+                            <LockIcon sx={{ color: greenColors.mediumGreen }} />
                           </InputAdornment>
                         ),
                         endAdornment: (
@@ -460,7 +452,7 @@ const Register = () => {
                               aria-label="toggle confirm password visibility"
                               onClick={handleToggleConfirmPasswordVisibility}
                               edge="end"
-                              sx={{ color: purpleColors.mediumPurple }}
+                              sx={{ color: greenColors.mediumGreen }}
                             >
                               {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                             </IconButton>
@@ -472,18 +464,18 @@ const Register = () => {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "16px",
                           "&.Mui-focused fieldset": {
-                            borderColor: purpleColors.mediumPurple,
+                            borderColor: greenColors.mediumGreen,
                             borderWidth: "2px",
                           },
                           "& fieldset": {
                             transition: "all 0.2s ease",
                           },
                           "&:hover fieldset": {
-                            borderColor: purpleColors.lighterPurple,
+                            borderColor: greenColors.lightGreen,
                           },
                         },
                         "& .MuiInputLabel-root.Mui-focused": {
-                          color: purpleColors.mediumPurple,
+                          color: greenColors.mediumGreen,
                         },
                         "& .MuiInputBase-input": {
                           padding: "14px 14px 14px 0",
@@ -506,13 +498,13 @@ const Register = () => {
                         mb: 3,
                         py: 1.5,
                         borderRadius: "16px",
-                        background: `linear-gradient(90deg, ${purpleColors.darkPurple} 0%, ${purpleColors.lightPurple} 100%)`,
+                        background: `linear-gradient(90deg, ${greenColors.darkGreen} 0%, ${greenColors.lightGreen} 100%)`,
                         color: "white",
                         fontFamily: "'Poppins', sans-serif",
                         fontWeight: 600,
                         fontSize: "1rem",
                         textTransform: "none",
-                        boxShadow: `0 8px 25px ${purpleColors.purpleShadow}`,
+                        boxShadow: `0 8px 25px ${greenColors.greenShadow}`,
                         transition: "all 0.3s ease",
                         position: "relative",
                         overflow: "hidden",
@@ -527,8 +519,8 @@ const Register = () => {
                           transition: "all 0.5s ease",
                         },
                         "&:hover": {
-                          background: `linear-gradient(90deg, ${purpleColors.deepPurple} 0%, ${purpleColors.mediumPurple} 100%)`,
-                          boxShadow: `0 10px 30px ${purpleColors.purpleShadow}`,
+                          background: `linear-gradient(90deg, ${greenColors.mediumGreen} 0%, ${greenColors.lightGreen} 100%)`,
+                          boxShadow: `0 10px 30px ${greenColors.greenShadow}`,
                           transform: "translateY(-2px)",
                           "&::before": {
                             left: "100%",
@@ -594,14 +586,14 @@ const Register = () => {
                         Já tem uma conta?
                       </Typography>
                       <Button
-                       onClick={() => router.push("/")}
+                        onClick={() => router.push("/")}
                         variant="outlined"
                         startIcon={<ArrowBackIcon />}
                         sx={{
                           borderRadius: "16px",
-                          borderColor: purpleColors.mediumPurple,
+                          borderColor: greenColors.mediumGreen,
                           borderWidth: "2px",
-                          color: purpleColors.mediumPurple,
+                          color: greenColors.mediumGreen,
                           fontFamily: "'Poppins', sans-serif",
                           fontWeight: 600,
                           textTransform: "none",
@@ -609,8 +601,8 @@ const Register = () => {
                           py: 1,
                           transition: "all 0.3s ease",
                           "&:hover": {
-                            borderColor: purpleColors.lightPurple,
-                            backgroundColor: `rgba(156, 39, 176, 0.05)`,
+                            borderColor: greenColors.lightGreen,
+                            backgroundColor: `rgba(139, 195, 74, 0.05)`,
                             transform: "translateY(-2px)",
                           },
                         }}

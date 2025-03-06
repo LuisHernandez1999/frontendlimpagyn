@@ -1,4 +1,3 @@
-
 "use client"
 
 import Head from "next/head"
@@ -30,16 +29,13 @@ import {
   ArrowForward as ArrowForwardIcon,
 } from "@mui/icons-material"
 
-
-const purpleColors = {
-  darkPurple: "#4a148c", 
-  mediumPurple: "#7b1fa2", 
-  lightPurple: "#9c27b0", 
-  lighterPurple: "#ba68c8", 
-  paleViolet: "#e1bee7", 
-  deepPurple: "#311b92",
-  textPurple: "#4a148c", 
-  purpleShadow: "rgba(74, 20, 140, 0.4)", 
+const greenColors = {
+  lightGreen: "#8bc34a",
+  paleGreen: "#dcedc8",
+  mediumGreen: "#7cb342",
+  darkGreen: "#689f38",
+  textGreen: "#33691e",
+  greenShadow: "rgba(139, 195, 74, 0.4)",
 }
 
 const Login = () => {
@@ -51,7 +47,6 @@ const Login = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
 
   useEffect(() => {
-   
     const timer = setTimeout(() => {
       setAnimationComplete(true)
     }, 300)
@@ -100,13 +95,12 @@ const Login = () => {
         sx={{
           minHeight: "100vh",
           display: "flex",
-          background: `linear-gradient(135deg, ${purpleColors.deepPurple} 0%, ${purpleColors.lightPurple} 100%)`,
+          background: `linear-gradient(135deg, ${greenColors.paleGreen} 0%, ${greenColors.lightGreen} 100%)`,
           position: "relative",
           overflow: "hidden",
           padding: { xs: "1rem", sm: "2rem" },
         }}
       >
-
         {[...Array(6)].map((_, i) => (
           <Box
             key={i}
@@ -151,10 +145,10 @@ const Login = () => {
                 flexDirection: "column",
                 background: "rgba(255, 255, 255, 0.95)",
                 backdropFilter: "blur(20px)",
-                boxShadow: `0 10px 40px ${purpleColors.purpleShadow}`,
+                boxShadow: `0 10px 40px ${greenColors.greenShadow}`,
                 transition: "all 0.3s ease-in-out",
                 "&:hover": {
-                  boxShadow: `0 15px 50px ${purpleColors.purpleShadow}`,
+                  boxShadow: `0 15px 50px ${greenColors.greenShadow}`,
                 },
               }}
             >
@@ -172,12 +166,12 @@ const Login = () => {
                       width: "80px",
                       height: "80px",
                       borderRadius: "24px",
-                      background: `linear-gradient(135deg, ${purpleColors.darkPurple} 0%, ${purpleColors.lightPurple} 100%)`,
+                      background: `linear-gradient(135deg, ${greenColors.mediumGreen} 0%, ${greenColors.lightGreen} 100%)`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       marginBottom: "1.5rem",
-                      boxShadow: `0 8px 25px ${purpleColors.purpleShadow}`,
+                      boxShadow: `0 8px 25px ${greenColors.greenShadow}`,
                       transform: "rotate(10deg)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -195,7 +189,7 @@ const Login = () => {
                     sx={{
                       fontFamily: "'Poppins', sans-serif",
                       fontWeight: 700,
-                      color: purpleColors.darkPurple,
+                      color: greenColors.textGreen,
                       marginBottom: "0.5rem",
                       textAlign: "center",
                       letterSpacing: "-0.5px",
@@ -232,7 +226,7 @@ const Login = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <EmailIcon sx={{ color: purpleColors.mediumPurple }} />
+                            <EmailIcon sx={{ color: greenColors.mediumGreen }} />
                           </InputAdornment>
                         ),
                       }}
@@ -241,18 +235,18 @@ const Login = () => {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "16px",
                           "&.Mui-focused fieldset": {
-                            borderColor: purpleColors.mediumPurple,
+                            borderColor: greenColors.mediumGreen,
                             borderWidth: "2px",
                           },
                           "& fieldset": {
                             transition: "all 0.2s ease",
                           },
                           "&:hover fieldset": {
-                            borderColor: purpleColors.lighterPurple,
+                            borderColor: greenColors.lightGreen,
                           },
                         },
                         "& .MuiInputLabel-root.Mui-focused": {
-                          color: purpleColors.mediumPurple,
+                          color: greenColors.mediumGreen,
                         },
                         "& .MuiInputBase-input": {
                           padding: "14px 14px 14px 0",
@@ -276,7 +270,7 @@ const Login = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <LockIcon sx={{ color: purpleColors.mediumPurple }} />
+                            <LockIcon sx={{ color: greenColors.mediumGreen }} />
                           </InputAdornment>
                         ),
                         endAdornment: (
@@ -285,7 +279,7 @@ const Login = () => {
                               aria-label="toggle password visibility"
                               onClick={handleTogglePasswordVisibility}
                               edge="end"
-                              sx={{ color: purpleColors.mediumPurple }}
+                              sx={{ color: greenColors.mediumGreen }}
                             >
                               {showPassword ? <VisibilityOff /> : <Visibility />}
                             </IconButton>
@@ -297,18 +291,18 @@ const Login = () => {
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "16px",
                           "&.Mui-focused fieldset": {
-                            borderColor: purpleColors.mediumPurple,
+                            borderColor: greenColors.mediumGreen,
                             borderWidth: "2px",
                           },
                           "& fieldset": {
                             transition: "all 0.2s ease",
                           },
                           "&:hover fieldset": {
-                            borderColor: purpleColors.lighterPurple,
+                            borderColor: greenColors.lightGreen,
                           },
                         },
                         "& .MuiInputLabel-root.Mui-focused": {
-                          color: purpleColors.mediumPurple,
+                          color: greenColors.mediumGreen,
                         },
                         "& .MuiInputBase-input": {
                           padding: "14px 14px 14px 0",
@@ -322,7 +316,26 @@ const Login = () => {
 
                   <Fade in={animationComplete} timeout={1300}>
                     <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-                      
+                      <Button
+                        variant="text"
+                        onClick={() => router.push("/password_redefine/password_redef")}
+                        sx={{
+                          color: greenColors.mediumGreen,
+                          fontFamily: "'Poppins', sans-serif",
+                          textTransform: "none",
+                          fontWeight: 500,
+                          fontSize: "0.875rem",
+                          padding: 0,
+                          minWidth: "auto",
+                          "&:hover": {
+                            background: "transparent",
+                            color: greenColors.lightGreen,
+                            textDecoration: "underline",
+                          },
+                        }}
+                      >
+                        Esqueceu a senha?
+                      </Button>
                     </Box>
                   </Fade>
 
@@ -336,13 +349,13 @@ const Login = () => {
                         mb: 3,
                         py: 1.5,
                         borderRadius: "16px",
-                        background: `linear-gradient(90deg, ${purpleColors.darkPurple} 0%, ${purpleColors.lightPurple} 100%)`,
+                        background: `linear-gradient(90deg, ${greenColors.mediumGreen} 0%, ${greenColors.lightGreen} 100%)`,
                         color: "white",
                         fontFamily: "'Poppins', sans-serif",
                         fontWeight: 600,
                         fontSize: "1rem",
                         textTransform: "none",
-                        boxShadow: `0 8px 25px ${purpleColors.purpleShadow}`,
+                        boxShadow: `0 8px 25px ${greenColors.greenShadow}`,
                         transition: "all 0.3s ease",
                         position: "relative",
                         overflow: "hidden",
@@ -357,8 +370,8 @@ const Login = () => {
                           transition: "all 0.5s ease",
                         },
                         "&:hover": {
-                          background: `linear-gradient(90deg, ${purpleColors.deepPurple} 0%, ${purpleColors.mediumPurple} 100%)`,
-                          boxShadow: `0 10px 30px ${purpleColors.purpleShadow}`,
+                          background: `linear-gradient(90deg, ${greenColors.darkGreen} 0%, ${greenColors.mediumGreen} 100%)`,
+                          boxShadow: `0 10px 30px ${greenColors.greenShadow}`,
                           transform: "translateY(-2px)",
                           "&::before": {
                             left: "100%",
@@ -421,9 +434,9 @@ const Login = () => {
                         variant="outlined"
                         sx={{
                           borderRadius: "16px",
-                          borderColor: purpleColors.mediumPurple,
+                          borderColor: greenColors.mediumGreen,
                           borderWidth: "2px",
-                          color: purpleColors.mediumPurple,
+                          color: greenColors.mediumGreen,
                           fontFamily: "'Poppins', sans-serif",
                           fontWeight: 600,
                           textTransform: "none",
@@ -431,8 +444,8 @@ const Login = () => {
                           py: 1,
                           transition: "all 0.3s ease",
                           "&:hover": {
-                            borderColor: purpleColors.lightPurple,
-                            backgroundColor: `rgba(156, 39, 176, 0.05)`,
+                            borderColor: greenColors.lightGreen,
+                            backgroundColor: `rgba(67, 160, 71, 0.05)`,
                             transform: "translateY(-2px)",
                           },
                         }}
