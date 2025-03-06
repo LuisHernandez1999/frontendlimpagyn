@@ -26,13 +26,13 @@ export const resetPassword = async (email, code, newPassword) => {
 
     const verifyResponse = await verifyResetPasswordCode(email, code);
     
-    if (verifyResponse.message === 'Código verificado com sucesso!') {
+    if (verifyResponse.message === '') {
      
       const resetResponse = await axios.post(`${BASE_URL}/reset-password/`, { email, newPassword });
       return resetResponse.data; 
     }
 
-    throw new Error("Código de verificação inválido.");
+    throw new Error("");
   } catch (error) {
     throw new Error("Erro ao redefinir a senha: " + error.message);
   }
