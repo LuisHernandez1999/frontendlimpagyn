@@ -89,9 +89,7 @@ const ResetPassword = () => {
       try {
         const response = await verifyResetPasswordCode(emailFormik.values.email, values.code)
         console.log(response)
-        // Aqui você pode redirecionar para uma página de definição de nova senha
-        // ou mostrar um formulário para definir a nova senha
-        router.push("/new-password")
+        router.push(`/create-new-password?email=${encodeURIComponent(emailFormik.values.email)}`)
       } catch (error) {
         console.error("Erro ao verificar código:", error)
         codeFormik.setErrors({ submit: error.message || "Código inválido. Tente novamente." })
